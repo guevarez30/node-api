@@ -1,0 +1,24 @@
+{
+  "name": "abstraction",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "expect": "^27.0.6",
+    "express": "^4.17.1",
+    "kind-of": "^6.0.3",
+    "mysql": "^2.18.1",
+    "p-is-promise": "^4.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "install": "^0.13.0",
+    "mocha": "^9.0.1"
+  }
+}
