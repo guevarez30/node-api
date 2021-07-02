@@ -1,7 +1,9 @@
-const paramsTransformer1 = (params) => {
-    return 1
-}
+const parseProjectId = ({project_id}) => {
+    return {
+        project_id: parseInt(project_id)
+    }
+};
 
 module.exports = {
-    paramsTransformer1: paramsTransformer1
+    parseProjectId: parseProjectId
 }
