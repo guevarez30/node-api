@@ -1,3 +1,5 @@
+const Status = require('../Classes/Status');
+
 /**
  * A pure function that will taken in the params object and transform it to fit the routeHandler
  * This function is the only piece in the route handling that should have full knowledge of the sever's state and context
@@ -32,35 +34,10 @@
 const runner = (routeHandlers, params) =>
   routeHandlers.reduce((acc, handler) => handler(...acc), params);
 
-class Status {
-  constructor(statusCode, message = "") {
-    this.code = statusCode;
-    this.message = message;
-  }
-  static isStatus(testVal) {
-    return testVal instanceof Status;
-  }
 
-  static ok(s) {
-    return new Status(200, s);
-  }
-
-  static error(s) {
-    return new Status(500, s);
-  }
-
-  static unauthorized(s) {
-    return new Status(401, s);
-  }
-
-  static invalid(s) {
-    return new Status(400, s);
-  }
-  static notFound(s) {
-    return new Status(404, s);
-  }
-}
-
+const pullErrorDetails = (err) =>{
+  return Status.isStatus(err) ? err : Status.error(err);
+};
 
 /**
  *
@@ -68,25 +45,34 @@ class Status {
  * @param {ReqValidator} requestObject
  * @param {RouteHandler|RouteHandlerp[]} routeHandler
  */
-const routeWrapper = (paramTransformers, reqValidator, routeHandler) => async (
+
+const routeWrapper = (reqValidator, paramTransformers, routeHandler) => async (
   req,
   res
 ) => {
   try {
-    reqValidator(req); // this will throw an error if any validation fails
-    
+
+    await Array.isArray(reqValidator) ? 
+      reqValidator.forEach((validator) => validator(req)) :
+      reqValidator(req); // this will throw an error if any validation fails
+
     const finalParams = paramTransformers
-      .map((transformer) => transformer(req.params))
+      .map((transformer) => transformer(req.params, req.body))
       .concat(req);
 
-    const result = await (Array.isArray(routeHandler) // a series of functions
-       ? runner(routeHandler, finalParams)
-       : routeHandler(...finalParams));
+      routeHandler()
 
-    return res.status(Status.ok().code).json(result);
+      // const result = await (Array.isArray(routeHandler) // a series of functions
+      // ? runner(routeHandler, finalParams)
+      // : routeHandler(...finalParams));
+
+    return res.status(200).json(result);
   } catch (err) {
-    console.log(err)
-    res.status(401).json({})
+
+    //console.log(err)
+    res.status(500).json({})
+    //const status = pullErrorDetails(err);
+    //return res.status(status.code).send(status);
   } finally {
     res.end(); // this will always run, pass or fail
   }
